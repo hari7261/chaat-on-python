@@ -1,0 +1,116 @@
+body {
+    background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
+    font-family: 'Segoe UI', 'San Francisco', Arial, sans-serif;
+    min-height: 100vh;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.glass-container {
+    background: rgba(255, 255, 255, 0.25);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    padding: 32px 24px;
+    width: 350px;
+    text-align: center;
+}
+.glass-form {
+    margin: 16px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.glass-form input, .glass-form button {
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+    outline: none;
+    font-size: 1rem;
+}
+.glass-form input {
+    background: rgba(255,255,255,0.5);
+    box-shadow: 0 2px 8px rgba(31,38,135,0.07);
+}
+.glass-form button {
+    background: linear-gradient(90deg, #0078d4 0%, #00c6fb 100%);
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.glass-form button:hover {
+    background: linear-gradient(90deg, #005fa3 0%, #0096c7 100%);
+}
+.glass-chat {
+    background: rgba(255,255,255,0.35);
+    border-radius: 12px;
+    padding: 16px;
+    height: 200px;
+    overflow-y: auto;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 8px rgba(31,38,135,0.07);
+    border: 1px solid rgba(255,255,255,0.18);
+}
+.glass-users {
+    background: rgba(255,255,255,0.25);
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 8px rgba(31,38,135,0.07);
+    border: 1px solid rgba(255,255,255,0.18);
+    text-align: left;
+}
+.glass-users h4 {
+    margin: 0 0 8px 0;
+    font-size: 1.05em;
+    color: #0078d4;
+}
+.user-item {
+    background: rgba(255,255,255,0.5);
+    border-radius: 8px;
+    padding: 4px 10px;
+    margin-bottom: 4px;
+    font-size: 1em;
+    color: #333;
+    box-shadow: 0 1px 4px rgba(31,38,135,0.05);
+    font-weight: 500;
+}
+.message {
+    margin-bottom: 8px;
+    text-align: left;
+}
+.room-id {
+    font-size: 0.8em;
+    color: #0078d4;
+    background: rgba(255,255,255,0.5);
+    padding: 2px 8px;
+    border-radius: 8px;
+    margin-left: 8px;
+}
+.info {
+    margin-top: 16px;
+    color: #555;
+    font-size: 0.95em;
+}
+.error {
+    color: #d8000c;
+    background: rgba(255,0,0,0.07);
+    border-radius: 8px;
+    padding: 8px;
+    margin-bottom: 12px;
+}
+.back-link {
+    display: inline-block;
+    margin-top: 12px;
+    color: #0078d4;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 1em;
+}
+.back-link:hover {
+    text-decoration: underline;
+}

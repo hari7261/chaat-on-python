@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ room_name }} - Chat Room</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+</head>
+<body>
+    <div class="glass-container">
+        <h2>{{ room_name }} <span class="room-id">ID: {{ room_id }}</span></h2>
+        <div class="glass-users">
+            <h4>Users in Room:</h4>
+            <ul id="user-list">
+                {% for user in users %}
+                    <li class="user-item">{{ user }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div id="chat-box" class="glass-chat">
+            {% for msg in messages %}
+                <div class="message"><b>{{ msg.user }}</b>: {{ msg.text }}</div>
+            {% endfor %}
+        </div>
+        <form id="chat-form" class="glass-form">
+            <input type="text" id="user" placeholder="Your Name" required>
+            <input type="text" id="message" placeholder="Type a message..." required>
+            <button type="submit">Send</button>
+        </form>
+        <a href="/" class="back-link">← Back</a>
+    </div>
+    <script>
+        const socket = io();
+        const roomId = "{{ room_id }}";
+        let currentUser = '';
+        document.getElementById('chat-form').onsubmit = function(e) {
+            e.preventDefault();
+            const user = document.getElementById('user').value || 'Anonymous';
+            currentUser = user;
+            const text = document.getElementById('message').value;
+            if (text.trim() === '') return;
+            socket.emit('send_message', { room_id: roomId, user, text });
+            document.getElementById('message').value = '';
+        };
+        // Join room with user name
+        document.getElementById('user').addEventListener('change', function() {
+            currentUser = this.value || 'Anonymous';
+            socket.emit('join', { room_id: roomId, user: currentUser });
+        });
+        // Initial join
+        setTimeout(() => {
+            currentUser = document.getElementById('user').value || 'Anonymous';
+            socket.emit('join', { room_id: roomId, user: currentUser });
+        }, 500);
+        socket.on('user_list', function(users) {
+            const userList = document.getElementById('user-list');
+            userList.innerHTML = '';
+            users.forEach(u => {
+                const li = document.createElement('li');
+                li.className = 'user-item';
+                li.textContent = u + (u === currentUser ? ' (You)' : '');
+                userList.appendChild(li);
+            });
+        });
+        socket.on('message', function(msg) {
+            const chatBox = document.getElementById('chat-box');
+            const div = document.createElement('div');
+            div.className = 'message';
+            div.innerHTML = `<b>${msg.user}</b>: ${msg.text}`;
+            chatBox.appendChild(div);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        });
+        window.addEventListener('beforeunload', function() {
+            socket.emit('leave', { room_id: roomId, user: currentUser });
+        });
+    </script>
+</body>
+</html>

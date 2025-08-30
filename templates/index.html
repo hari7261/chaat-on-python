@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Rooms</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="glass-container">
+        <h1>Chat Rooms</h1>
+        {% if error %}<div class="error">{{ error }}</div>{% endif %}
+        <form action="/create_room" method="post" class="glass-form">
+            <input type="text" name="room_name" placeholder="Room Name" required>
+            <button type="submit">Create Room</button>
+        </form>
+        <form action="/join_room" method="post" class="glass-form">
+            <input type="text" name="room_id" placeholder="Room ID" required>
+            <button type="submit">Join Room</button>
+        </form>
+        <div class="info">Create a new room or join an existing one by ID.</div>
+    </div>
+</body>
+</html>
