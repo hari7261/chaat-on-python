@@ -31,48 +31,65 @@
         <a href="/" class="back-link">← Back</a>
     </div>
     <script>
-        const socket = io();
         const roomId = "{{ room_id }}";
-        let currentUser = '';
+        let currentUser = document.getElementById('user').value || 'Anonymous';
+
+        // Poll messages and users every 2 seconds
+        function pollMessages() {
+            fetch(`/api/messages/${roomId}`)
+                .then(res => res.json())
+                .then(messages => {
+                    const chatBox = document.getElementById('chat-box');
+                    chatBox.innerHTML = '';
+                    messages.forEach(msg => {
+                        const div = document.createElement('div');
+                        div.className = 'message';
+                        div.innerHTML = `<b>${msg.user}</b>: ${msg.text}`;
+                        chatBox.appendChild(div);
+                    });
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                });
+        }
+        function pollUsers() {
+            fetch(`/api/users/${roomId}`)
+                .then(res => res.json())
+                .then(users => {
+                    const userList = document.getElementById('user-list');
+                    userList.innerHTML = '';
+                    users.forEach(u => {
+                        const li = document.createElement('li');
+                        li.className = 'user-item';
+                        li.textContent = u + (u === currentUser ? ' (You)' : '');
+                        userList.appendChild(li);
+                    });
+                });
+        }
+        setInterval(() => {
+            pollMessages();
+            pollUsers();
+        }, 2000);
+        pollMessages();
+        pollUsers();
+
         document.getElementById('chat-form').onsubmit = function(e) {
             e.preventDefault();
             const user = document.getElementById('user').value || 'Anonymous';
             currentUser = user;
             const text = document.getElementById('message').value;
             if (text.trim() === '') return;
-            socket.emit('send_message', { room_id: roomId, user, text });
-            document.getElementById('message').value = '';
+            fetch(`/api/messages/${roomId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user, text })
+            }).then(() => {
+                document.getElementById('message').value = '';
+                pollMessages();
+                pollUsers();
+            });
         };
-        // Join room with user name
         document.getElementById('user').addEventListener('change', function() {
             currentUser = this.value || 'Anonymous';
-            socket.emit('join', { room_id: roomId, user: currentUser });
-        });
-        // Initial join
-        setTimeout(() => {
-            currentUser = document.getElementById('user').value || 'Anonymous';
-            socket.emit('join', { room_id: roomId, user: currentUser });
-        }, 500);
-        socket.on('user_list', function(users) {
-            const userList = document.getElementById('user-list');
-            userList.innerHTML = '';
-            users.forEach(u => {
-                const li = document.createElement('li');
-                li.className = 'user-item';
-                li.textContent = u + (u === currentUser ? ' (You)' : '');
-                userList.appendChild(li);
-            });
-        });
-        socket.on('message', function(msg) {
-            const chatBox = document.getElementById('chat-box');
-            const div = document.createElement('div');
-            div.className = 'message';
-            div.innerHTML = `<b>${msg.user}</b>: ${msg.text}`;
-            chatBox.appendChild(div);
-            chatBox.scrollTop = chatBox.scrollHeight;
-        });
-        window.addEventListener('beforeunload', function() {
-            socket.emit('leave', { room_id: roomId, user: currentUser });
+            pollUsers();
         });
     </script>
 </body>

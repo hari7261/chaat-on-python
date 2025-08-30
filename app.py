@@ -1,10 +1,9 @@
 from flask import Flask, render_template, request, redirect, url_for
-from flask_socketio import SocketIO, join_room, leave_room, send
 import uuid
+from flask import Flask, render_template, request, redirect, url_for, jsonify
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
-socketio = SocketIO(app)
 
 rooms = {}
 room_users = {}
@@ -36,6 +35,29 @@ def chat_room(room_id):
     users = list(room_users.get(room_id, []))
     return render_template('chat.html', room_id=room_id, room_name=room['name'], messages=room['messages'], users=users)
 
+# REST API endpoints for polling
+@app.route('/api/messages/<room_id>', methods=['GET'])
+def get_messages(room_id):
+    if room_id not in rooms:
+        return jsonify([])
+    return jsonify(rooms[room_id]['messages'])
+
+@app.route('/api/messages/<room_id>', methods=['POST'])
+def post_message(room_id):
+    data = request.get_json()
+    user = data.get('user', 'Anonymous')
+    text = data.get('text', '')
+    if room_id in rooms and text:
+        message = {'user': user, 'text': text}
+        rooms[room_id]['messages'].append(message)
+        room_users.setdefault(room_id, set()).add(user)
+        return jsonify({'status': 'ok'})
+    return jsonify({'status': 'error'}), 400
+
+@app.route('/api/users/<room_id>', methods=['GET'])
+def get_users(room_id):
+    return jsonify(list(room_users.get(room_id, [])))
+
 @socketio.on('send_message')
 def handle_message(data):
     room_id = data['room_id']
@@ -52,14 +74,6 @@ def on_join(data):
     room_users.setdefault(room_id, set()).add(user)
     # Broadcast updated user list
     socketio.emit('user_list', list(room_users[room_id]), room=room_id)
-@socketio.on('leave')
-def on_leave(data):
-    room_id = data['room_id']
-    user = data['user']
-    leave_room(room_id)
-    if room_id in room_users and user in room_users[room_id]:
-        room_users[room_id].remove(user)
-        socketio.emit('user_list', list(room_users[room_id]), room=room_id)
-
 if __name__ == '__main__':
-    socketio.run(app, debug=True)
+    app.run(debug=True)
+    room_id = data['room_id']
